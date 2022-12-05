@@ -17,8 +17,8 @@ import javax.security.auth.login.LoginException;
 
 public class BeanBot {
 
-    private final Dotenv config;
     private final ShardManager shardManager;
+    private final Dotenv config;
 
     public Dotenv getConfig() {
         return config;
@@ -27,6 +27,7 @@ public class BeanBot {
     public BeanBot() throws LoginException {
         config = Dotenv.configure().load();
         String token = config.get("TOKEN");
+        String psw = config.get("PW");
 
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);

