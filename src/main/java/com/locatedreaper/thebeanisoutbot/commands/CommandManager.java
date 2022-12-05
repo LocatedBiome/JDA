@@ -105,7 +105,7 @@ private Dotenv config;
         //Option Data
         OptionData option1 = new OptionData(OptionType.STRING, "message", "The message you want the bot to say", true);
         OptionData newroleName = new OptionData(OptionType.STRING, "newrolename", "The name for the role", true);
-        OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command", true);
+        OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command", false);
         //Commands
         fs.add(Commands.slash("funny", "Say something funny"));
         umb.add(Commands.slash("roles", "Display all roles on the server."));
