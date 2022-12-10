@@ -67,7 +67,7 @@ public class EventListener extends ListenerAdapter {
                 + " channel."
                 + "\n"
                 + jumpLink;
-        TextChannel textChannel = event.getGuild().getTextChannelsByName("reaction-moderation",true).get(0);
+        TextChannel textChannel = event.getGuild().getTextChannelsByName("reaction-testing",true).get(0);
 
         textChannel.sendMessage(message).queue();
     }
@@ -101,7 +101,7 @@ public class EventListener extends ListenerAdapter {
         TextChannel textChannel = event.getGuild().getTextChannelsByName("mod-updates", true).get(0);
         textChannel.sendMessage(message).queue();
     }
-
+/*
     @Override
     public void onUserUpdateOnlineStatus(@NotNull UserUpdateOnlineStatusEvent event) {
         List<Member> members = event.getGuild().getMembers();
@@ -126,7 +126,7 @@ public class EventListener extends ListenerAdapter {
         TextChannel textChannel = event.getGuild().getTextChannelsByName("mod-unnecessary-updates", true).get(0);
         textChannel.sendMessage(message).queue();
     }
-
+*/
 //    @Override
 //    public void onGenericMessage(@NotNull GenericMessageEvent event) {
 //        User user = event.getJDA().getUserById(456594340148674562L);

