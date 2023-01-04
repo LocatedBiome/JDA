@@ -31,8 +31,8 @@ public class BeanBot {
 
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);
-        builder.setStatus(OnlineStatus.INVISIBLE);
-        builder.setActivity(Activity.watching("AnthiosLive"));
+        builder.setStatus(OnlineStatus.IDLE);
+        builder.setActivity(Activity.listening("Colin next to the Karaoke machine"));
         builder.setMemberCachePolicy(MemberCachePolicy.ALL);
         builder.setChunkingFilter(ChunkingFilter.ALL);
         builder.enableCache(CacheFlag.ACTIVITY,CacheFlag.ONLINE_STATUS,CacheFlag.CLIENT_STATUS);
